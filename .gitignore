@@ -1,0 +1,22 @@
+# SwiftPM
+.build/
+.swiftpm/
+Package.resolved
+*.xcodeproj/
+*.xcworkspace/
+xcuserdata/
+DerivedData/
+
+# macOS
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
+
+# Local-only Claude Code settings (the shared ones live in .claude/settings.json)
+.claude/settings.local.json
+
+# Probe output that is not a fixture
+*.log
+/captures/
