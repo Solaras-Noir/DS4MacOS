@@ -16,6 +16,7 @@ public final class OutputScheduler {
     private var bluetooth = false
     private var sequence: UInt8 = 0
     private var timer: Timer?
+    private var setupSentFor: ObjectIdentifier?
 
     /// Number of failed `IOHIDDeviceSetReport` calls since creation.
     public private(set) var failedWrites = 0
@@ -64,13 +65,20 @@ public final class OutputScheduler {
         guard let device = device else {
             timer?.invalidate()
             timer = nil
+            setupSentFor = nil
             return
         }
         bluetooth = device.isBluetooth
-        if bluetooth { write(OutputReport.lightbarSetup()) }
+        var sentSetup = false
+        if bluetooth, setupSentFor != ObjectIdentifier(device) {
+            write(OutputReport.lightbarSetup())
+            setupSentFor = ObjectIdentifier(device)
+            sentSetup = true
+        }
         logic.markReconnected()
         startTimer()
-        tick()
+        // After the setup report the full state waits for the next timer tick (10 ms gap).
+        if !sentSetup { tick() }
     }
 
     private func startTimer() {

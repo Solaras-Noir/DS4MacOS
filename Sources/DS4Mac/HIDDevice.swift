@@ -35,6 +35,7 @@ public final class HIDDevice {
     private var buffer: UnsafeMutablePointer<UInt8>?
     private var bufferSize = 0
     private var isOpen = false
+    private var openOptions = IOOptionBits(kIOHIDOptionsTypeNone)
 
     init(device: IOHIDDevice) {
         self.device = device
@@ -72,6 +73,7 @@ public final class HIDDevice {
         let result = IOHIDDeviceOpen(device, options)
         guard result == 0 else { return result }
         isOpen = true
+        openOptions = options
 
         let size = max(maxInputReportSize, 64)
         let buf = UnsafeMutablePointer<UInt8>.allocate(capacity: size)
@@ -96,7 +98,7 @@ public final class HIDDevice {
         guard isOpen else { return }
         isOpen = false
         IOHIDDeviceUnscheduleFromRunLoop(device, CFRunLoopGetMain(), CFRunLoopMode.commonModes.rawValue)
-        _ = IOHIDDeviceClose(device, IOOptionBits(kIOHIDOptionsTypeNone))
+        _ = IOHIDDeviceClose(device, openOptions)
         buffer?.deallocate()
         buffer = nil
         bufferSize = 0

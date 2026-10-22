@@ -115,13 +115,15 @@ public final class DeviceManager {
     }
 
     /// Closes and reopens every device with the new seize setting, so a profile change at runtime
-    /// switches modes without restarting. The active device stays active; no connect or disconnect
+    /// switches modes without restarting. Also sets the scheduler's re-assert flag (on when not seized, i.e. augment). The active device stays active; no connect or disconnect
     /// callbacks fire unless a reopen fails.
     public func reopen(seize newSeize: Bool) {
         seize = newSeize
         let current = entries
+        scheduler.setReassert(!newSeize)
         for entry in current {
             entry.hid.close()
+            entry.decoder = InputDecoder()
             if !prepare(entry) {
                 removeEntry(entry)
             }
