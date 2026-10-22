@@ -39,9 +39,10 @@ Facts behind this (from `docs/mac-tests/M0-results.md`):
   re-asserts its outputs periodically instead of assuming they stick.
 - Seize works without root and hides the pad from the game, but a game that has seen the pad once
   stays in controller mode; seize must be active before the game launches.
-- Fallout 4 ignores the keyboard while it is in controller mode, so in Fallout 4 `augment` can only
-  add feedback (triggers, rumble, lightbar), not key bindings. `proxy` is the Fallout 4 answer for
-  analogue plus touchpad bindings; `keyboardMouse` is the fallback and loses analogue.
+- Fallout 4 ignores its own default keyboard bindings while in controller mode, but mod hotkeys
+  (F4SE and MCM bindings) still take keyboard input. So in Fallout 4 `augment` adds feedback plus
+  touchpad gestures bound to mod hotkeys, which is the owner's main use. `proxy` adds full remapping
+  of the pad itself with analogue intact; `keyboardMouse` is the fallback and loses analogue.
 - Keyboard and mouse injection through CGEvent works in CrossOver games, including relative mouse
   look. The IOKit input callback buffer includes the report ID in byte 0.
 - The XInput proxy DLL is the only route to analogue sticks and game-driven rumble in CrossOver
