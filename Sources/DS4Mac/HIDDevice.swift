@@ -1,4 +1,6 @@
 #if os(macOS)
+// Threading: everything runs on the main run loop (CFRunLoopGetMain, common modes), including the
+// input report callback. No locking is needed as long as callers also stay on the main thread.
 import Foundation
 import IOKit
 import IOKit.hid
@@ -23,12 +25,17 @@ public final class HIDDevice {
     public let transport: String
     /// `kIOHIDMaxInputReportSizeKey` value.
     public let maxInputReportSize: Int
+    /// True when the transport string names Bluetooth.
+    public var isBluetooth: Bool { transport.lowercased().contains("bluetooth") }
+    /// True when the transport string names USB.
+    public var isUSB: Bool { transport.lowercased().contains("usb") }
     /// Called for every input report with the report ID and the buffer as delivered by IOKit.
     public var onInputReport: ((UInt8, [UInt8]) -> Void)?
 
     private var buffer: UnsafeMutablePointer<UInt8>?
     private var bufferSize = 0
     private var isOpen = false
+    private var openOptions = IOOptionBits(kIOHIDOptionsTypeNone)
 
     init(device: IOHIDDevice) {
         self.device = device
@@ -66,6 +73,7 @@ public final class HIDDevice {
         let result = IOHIDDeviceOpen(device, options)
         guard result == 0 else { return result }
         isOpen = true
+        openOptions = options
 
         let size = max(maxInputReportSize, 64)
         let buf = UnsafeMutablePointer<UInt8>.allocate(capacity: size)
@@ -81,7 +89,7 @@ public final class HIDDevice {
             let bytes = Array(UnsafeBufferPointer(start: report, count: count))
             me.onInputReport?(UInt8(truncatingIfNeeded: reportID), bytes)
         }, context)
-        IOHIDDeviceScheduleWithRunLoop(device, CFRunLoopGetMain(), CFRunLoopMode.defaultMode.rawValue)
+        IOHIDDeviceScheduleWithRunLoop(device, CFRunLoopGetMain(), CFRunLoopMode.commonModes.rawValue)
         return result
     }
 
@@ -89,10 +97,11 @@ public final class HIDDevice {
     public func close() {
         guard isOpen else { return }
         isOpen = false
-        IOHIDDeviceUnscheduleFromRunLoop(device, CFRunLoopGetMain(), CFRunLoopMode.defaultMode.rawValue)
-        _ = IOHIDDeviceClose(device, IOOptionBits(kIOHIDOptionsTypeNone))
+        IOHIDDeviceUnscheduleFromRunLoop(device, CFRunLoopGetMain(), CFRunLoopMode.commonModes.rawValue)
+        _ = IOHIDDeviceClose(device, openOptions)
         buffer?.deallocate()
         buffer = nil
+        bufferSize = 0
     }
 
     /// Sends an output report. `bytes` must include the report ID in byte 0.

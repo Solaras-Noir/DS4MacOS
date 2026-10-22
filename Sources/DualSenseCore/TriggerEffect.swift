@@ -3,7 +3,7 @@
 /// Named effects are built with the static factories, which return nil for out-of-range arguments and
 /// `.off` when the arguments mean "no effect". Packing follows `docs/protocol/dualsense-hid.md`, section
 /// Trigger effects (derived from Nielk1 TriggerEffectGenerator).
-public enum TriggerEffect: Equatable {
+public enum TriggerEffect: Equatable, Codable {
     /// No effect (all 11 bytes zero). The doc notes N uses mode 0x05 for off; 0x00 is what we send, so
     /// it is the one to test on hardware.
     case off
