@@ -6,6 +6,11 @@
 # Usage: scripts/swift build | scripts/swift test | scripts/swift package ...
 set -euo pipefail
 
+# macOS: prefer Xcode's toolchain, because the Command Line Tools ship no XCTest.
+if [ "$(uname -s)" = "Darwin" ] && [ -z "${DEVELOPER_DIR:-}" ] && [ -d /Applications/Xcode.app/Contents/Developer ]; then
+  export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
+fi
+
 if command -v swift >/dev/null 2>&1; then
   exec swift "$@"
 fi
