@@ -88,8 +88,8 @@ Unplug the physical controller for this test, so the game sees only the stub's s
 ## Log
 
 `%TEMP%\xinput-stub.log` inside the bottle, typically
-`<bottle>/drive_c/users/crossover/Temp/xinput-stub.log`. The first line (`DLL_PROCESS_ATTACH loaded as ...`)
-names the DLL file the game loaded.
+`<bottle>/drive_c/users/crossover/Temp/xinput-stub.log`.
+The stub logs nothing at load; the first line appears on the first XInput call.
 
 ## Remove
 

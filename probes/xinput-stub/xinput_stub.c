@@ -1,5 +1,5 @@
 /* XInput stub for the M0 feasibility test. Reports a synthetic controller 0 and logs rumble calls.
- * Self-contained: no xinput headers, imports only kernel32.dll and msvcrt.dll. */
+ * Self-contained: no xinput headers, imports only kernel32.dll. */
 #include <windows.h>
 
 #define STUB_ERROR_EMPTY 4306

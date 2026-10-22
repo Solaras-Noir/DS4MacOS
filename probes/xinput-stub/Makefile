@@ -1,6 +1,6 @@
 CC      = x86_64-w64-mingw32-gcc
 CFLAGS  = -O2 -Wall -Wextra -ffreestanding -fno-builtin -fno-stack-protector
-LDFLAGS = -shared -s -nostdlib -nostartfiles -Wl,-e,DllMain
+LDFLAGS = -shared -s -nostdlib -nostartfiles -Wl,-e,DllMain -Wl,--disable-dynamicbase -Wl,--disable-high-entropy-va -Wl,--image-base=0x180000000
 LIBS    = -lkernel32
 
 all: bin/xinput1_3.dll bin/xinput1_4.dll
