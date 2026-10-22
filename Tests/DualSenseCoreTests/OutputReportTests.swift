@@ -13,10 +13,10 @@ final class OutputReportTests: XCTestCase {
         var r = OutputReport()
         r.rumble(strong: 200, weak: 50)
         let b = r.usbBytes()
-        XCTAssertEqual(b[1], 0x01)
+        XCTAssertEqual(b[1], 0x02)
         XCTAssertEqual(b[2], 0)
-        XCTAssertEqual(b[3], 50)   // motor_right = weak
-        XCTAssertEqual(b[4], 200)  // motor_left = strong
+        XCTAssertEqual(b[3], 50)   // motor_right = weak (common offset 2)
+        XCTAssertEqual(b[4], 200)  // motor_left = strong (common offset 3)
         XCTAssertEqual(b[39], 0x04)
     }
 
@@ -81,7 +81,7 @@ final class OutputReportTests: XCTestCase {
         r.rightTrigger = .off
         r.leftTrigger = .off
         let b = r.usbBytes()
-        XCTAssertEqual(b[1], 0x0D)
+        XCTAssertEqual(b[1], 0x0E)  // v2 default: haptics select + both triggers
         XCTAssertEqual(b[2], 0x15)
         XCTAssertEqual(b[39], 0x04)
     }

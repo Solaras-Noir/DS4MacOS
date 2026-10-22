@@ -16,7 +16,7 @@ func badUsage(_ message: String) -> Never {
 /// Minimal argument parser: positionals, `--flag value` pairs and bare `--switch` flags.
 struct Args {
     private static let valueFlags: Set<String> = [
-        "--seconds", "--label", "--out", "--ms", "--hold", "--repeat", "--interval", "--sens",
+        "--seconds", "--label", "--out", "--ms", "--hold", "--repeat", "--interval", "--sens", "--vibration",
     ]
     var positional: [String] = []
     private var values: [String: String] = [:]

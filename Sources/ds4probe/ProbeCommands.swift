@@ -51,11 +51,54 @@ func runRumble(_ args: Args) -> Never {
     let strong = args.positionalByte(0, "STRONG")
     let weak = args.positionalByte(1, "WEAK")
     let ms = max(0, args.int("--ms", default: 500))
+    var mode = VibrationMode.v2
+    if let text = args.string("--vibration") {
+        switch text {
+        case "v1": mode = .v1
+        case "v2": mode = .v2
+        default: badUsage("--vibration must be v1 or v2")
+        }
+    }
     var on = OutputReport()
+    on.vibrationMode = mode
     on.rumble(strong: strong, weak: weak)
     var off = OutputReport()
+    off.vibrationMode = mode
     off.rumble(strong: 0, weak: 0)
+    let bytes = on.usbBytes()
+    if bytes.count > 39 {
+        print("vibration mode: \(mode == .v1 ? "v1" : "v2")")
+        print(String(format: "flag0 (out[1]) = 0x%02X, flag2 (out[39]) = 0x%02X", bytes[1], bytes[39]))
+    }
     sendOutput(on, followUp: (delay: Double(ms) / 1000.0, report: off))
+}
+
+/// Reads feature report 0x20 and prints update_version and the rumble variant it implies.
+func runFirmware() -> Never {
+    let device = openFirstDevice(seize: false)
+    guard let bytes = device.getFeatureReport(id: 0x20, length: 64) else {
+        print("feature report 0x20 read FAILED")
+        exit(1)
+    }
+    print("feature report 0x20: \(bytes.count) bytes")
+    print("first 4 bytes: \(hex(Array(bytes.prefix(4))))")
+    // Expectation (verify on hardware): IOHIDDeviceGetReport returns the report ID at byte 0 for numbered
+    // reports, matching the kernel buffer layout, so update_version is at offset 44. If byte 0 is not 0x20
+    // the ID was stripped and the offset below is off by one.
+    if bytes.first != 0x20 {
+        print("warning: byte 0 is not 0x20; report ID may be stripped, offset 44 may be wrong")
+    }
+    guard let version = FirmwareInfo.updateVersion(featureReport: bytes) else {
+        print("buffer too short for update_version")
+        exit(1)
+    }
+    print(String(format: "update_version: 0x%04X", version))
+    if VibrationMode.forUpdateVersion(version) == .v2 {
+        print("vibration mode: v2 (>= 0x0215)")
+    } else {
+        print("vibration mode: v1")
+    }
+    exit(0)
 }
 
 func runTrigger(_ args: Args) -> Never {

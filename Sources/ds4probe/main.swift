@@ -9,7 +9,8 @@ commands:
   dump --seconds N --label TEXT --out PATH capture input reports to a fixture file
   read [--seize]                           print decoded input reports at 10 Hz
   lightbar R G B                           set the lightbar color
-  rumble STRONG WEAK [--ms N]              run the rumble motors (default 500 ms)
+  rumble STRONG WEAK [--ms N] [--vibration v1|v2]  run the rumble motors (default 500 ms, v2)
+  firmware                                 read feature report 0x20, print update_version and rumble variant
   trigger left|right MODE P1..P10          set an adaptive trigger effect (decimal)
   player N                                 set the player LEDs (0-5)
   inject-key KEYCODE [--hold MS]           post a keyboard event
@@ -35,6 +36,7 @@ case "dump": runDump(args)
 case "read": runRead(args)
 case "lightbar": runLightbar(args)
 case "rumble": runRumble(args)
+case "firmware": runFirmware()
 case "trigger": runTrigger(args)
 case "player": runPlayer(args)
 case "inject-key": runInjectKey(args)
