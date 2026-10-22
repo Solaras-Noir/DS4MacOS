@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Runs `swift <args>` with whatever toolchain is available:
+#   1. a swift on PATH (Mac, or the cloud VM after cloud-setup.sh installed one),
+#   2. a toolchain under /opt/swift-*/usr/bin,
+#   3. the official Swift Docker image with the repo mounted at /src.
+# Usage: scripts/swift build | scripts/swift test | scripts/swift package ...
+set -euo pipefail
+
+if command -v swift >/dev/null 2>&1; then
+  exec swift "$@"
+fi
+
+for candidate in /opt/swift-*/usr/bin/swift; do
+  if [ -x "$candidate" ]; then
+    exec "$candidate" "$@"
+  fi
+done
+
+if command -v docker >/dev/null 2>&1; then
+  IMAGE="swift:${SWIFT_VERSION:-6.2}-noble"
+  if ! docker info >/dev/null 2>&1; then
+    (dockerd >/tmp/dockerd.log 2>&1 &)
+    for _ in $(seq 1 20); do docker info >/dev/null 2>&1 && break; sleep 1; done
+  fi
+  REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+  exec docker run --rm -v "${REPO_ROOT}:/src" -w /src -e HOME=/src/.build/docker-home "$IMAGE" swift "$@"
+fi
+
+echo "scripts/swift: no Swift toolchain found (no swift on PATH, nothing under /opt, no docker)." >&2
+echo "On the cloud VM, check docs/cloud-environment.md. On a Mac, run: xcode-select --install" >&2
+exit 127

@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux-core:
+    name: Linux (DualSenseCore)
+    runs-on: ubuntu-24.04
+    container: swift:6.2-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Swift version
+        run: swift --version
+      - name: Build
+        if: hashFiles('Package.swift') != ''
+        run: swift build
+      - name: Test
+        if: hashFiles('Package.swift') != ''
+        run: swift test
+
+  macos:
+    name: macOS (all targets)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Swift version
+        run: swift --version
+      - name: Build
+        if: hashFiles('Package.swift') != ''
+        run: swift build
+      - name: Test
+        if: hashFiles('Package.swift') != ''
+        run: swift test
