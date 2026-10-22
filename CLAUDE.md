@@ -20,6 +20,17 @@ Read `docs/pipeline.md` before doing any work. It explains who does what and how
 - Swift 5 language mode (`swiftLanguageModes: [.v5]`) on a 6.0 tools version, XCTest for tests.
   This is a cost decision: strict concurrency errors burn tokens for no product value yet.
 
+## Decisions from the M0 feasibility tests (`docs/mac-tests/M0-results.md`)
+
+- The app owns the controller: it opens the DualSense with seize as soon as it connects, on USB or
+  Bluetooth, and holds it while the app runs. Games never see the physical controller. A game that
+  has seen the controller once stays in controller mode, so seize-before-launch is the user's rule
+  and the app's default, with an explicit pass-through toggle for games with native support.
+- Keyboard and mouse injection through CGEvent works in CrossOver games, including relative mouse
+  look. The IOKit input callback buffer includes the report ID in byte 0.
+- The XInput proxy DLL is the only route to analogue sticks and game-driven rumble in CrossOver
+  games; it stays conditional on the rebuilt stub loading cleanly (M1-T6, retested in M2).
+
 ## Repository layout
 
 ```
