@@ -55,6 +55,10 @@ final class Runner {
     /// Releases everything, stops the device manager. Called before the process exits.
     func shutdown() {
         releaseEverything()
+        manager.scheduler.stopRumble()
+        // The scheduler writes from its 10 ms timer; spin the run loop briefly so the stop is sent
+        // before the device is detached.
+        RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.06))
         manager.stop()
         releaseEverything()
     }

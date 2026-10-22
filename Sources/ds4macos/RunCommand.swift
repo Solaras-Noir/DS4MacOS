@@ -24,7 +24,7 @@ private func finish() -> Never {
 }
 
 private func installSignalHandlers() {
-    for sig in [SIGINT, SIGTERM, SIGHUP] {
+    for sig in [SIGINT, SIGTERM, SIGHUP, SIGTSTP, SIGQUIT] {
         _ = signal(sig, SIG_IGN)
         let source = DispatchSource.makeSignalSource(signal: sig, queue: .main)
         source.setEventHandler { finish() }
