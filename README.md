@@ -13,3 +13,8 @@ documented in `docs/pipeline.md`. Milestone specs live in `specs/`, session repo
 `docs/sessions/`, and token measurements in `docs/usage-log.md`.
 
 Status: M0 (scaffold and feasibility) in progress.
+
+## Build and test
+
+- Linux or cloud (core only): `scripts/swift build` and `scripts/swift test`
+- Mac (everything): `swift build`, `swift test`, `swift run ds4probe <command>`
