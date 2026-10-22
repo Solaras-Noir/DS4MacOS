@@ -12,7 +12,7 @@ stated "buffer".
 
 | Field | Value | Source |
 |---|---|---|
-| Vendor / product | `0x054C`; `0x0CE6` DualSense, `0x0DF2` Edge | dualsensehid.js FILTERS, E L113; K product ids used at L1798-1810 |
+| Vendor / product | `0x054C`; `0x0CE6` DualSense, `0x0DF2` Edge | dualsensehid.js FILTERS, E L113; K product ids at L1805-1809 |
 | USB input report | ID `0x01`, 64 bytes incl. ID | K L81-82; F usb-*.hex (64-byte buffer) |
 | USB output report | ID `0x02`. K: 63 bytes incl. ID. E: 47 data + ID = 48. USB descriptor Report Count 47 (0x2F) | K L85-86; E L909; rdusb.txt L56-59 |
 | BT input report (full) | ID `0x31`, 78 bytes incl. ID, CRC32 last 4 | K L83-84; F bt-*.hex |
@@ -59,7 +59,7 @@ column says what else confirms it.
 |---|---|---|---|---|
 | 0-3 | 4 | x, y, rx, ry | Left X, Left Y, Right X, Right Y, 0..255, centre ~128, Y 0 = up | F usb-sticks (0..255 spans), M0 |
 | 4, 5 | 2 | z, rz | L2, R2 analog 0..255 | K L1496+ |
-| 6 | 1 | seq_number | Increments per report | F |
+| 6 | 1 | seq_number | USB: increments per report (F usb-idle 112, 115, ...). BT: constant `1` in every fixture row (the counter is in the BT tag byte, buffer 1, instead) | F |
 | 7 | 1 | buttons[0] | bits 0-3 hat (0 N,1 NE,2 E,3 SE,4 S,5 SW,6 W,7 NW,8 neutral); bit 4 Square, 5 Cross, 6 Circle, 7 Triangle | K L98-102; F hat/face fixtures (idle `08`, Cross `28`) |
 | 8 | 1 | buttons[1] | L1 b0, R1 b1, L2 click b2, R2 click b3, Create b4, Options b5, L3 b6, R3 b7 | K L103-110 |
 | 9 | 1 | buttons[2] | PS b0, touchpad click b1, mic mute b2. Edge only: Fn1 b4, Fn2 b5, left paddle b6, right paddle b7 | K L111-119 |
@@ -108,10 +108,10 @@ Touch point (4 bytes, K L236-241, L139-147):
 x = `(b2 & 0x0F) << 8 | b1`, y = `b3 << 4 | b2 >> 4`. Pad is 1920 x 1080 (K L177-178). Matches F
 (top-left x 38-40,y 91-96; bottom-right x ~1807,y ~955) and E L33-39 / dualsensehid.js.
 
-Gyro/accel order: K (struct L255-257, scaling L1556-1573) and E/dualsensehid.js put gyro at payload 15
-and accel at 21. P's index arithmetic differs (its list is offset); I did not resolve it. Fixture
-usb-idle decodes payload 15-20 as (4095, -23040, -10496) and 21-26 as (17925, -7138, -22530); the pad
-was not flat so this does not settle it. Trust K; confirm with a flat-on-table capture (UNVERIFIED).
+Gyro/accel order: confirmed. Row 0 of usb-idle.hex decodes (LE int16) gyro at payload 15-20 =
+(-104, 27, 175) and accel at 21-26 = (1534, 7897, -230); bt-idle row 0 gyro (0, -1, 0), accel
+(-56, 7999, 1052). Gyro near 0 and about 1 g (8192) on the Y accel axis at rest match K's layout
+(gyro at 15, accel at 21). P's differing indices are not used.
 
 ## Bluetooth `0x31` framing
 
@@ -133,7 +133,7 @@ bytes 74-77. Seeds: **`0xA1` input, `0xA2` output, `0xA3` feature** (K L77-79, L
 ## Output report common block (47 bytes)
 
 USB: common offset c is at report buffer offset **c + 1** (after ID `0x02`). BT: buffer offset **c + 3**.
-Source: K `struct dualsense_output_report_common` L269-299 (size asserted 47, L300).
+Source: K `struct dualsense_output_report_common` L270-299 (size asserted 47, L300).
 
 | Offset | Size | Name | Meaning | Source |
 |---|---|---|---|---|
@@ -181,7 +181,7 @@ common->motor_left  = ds->motor_left;   common->motor_right = ds->motor_right;
 
 So the kernel sets valid_flag0 bit 1 **always**, plus exactly one of flag0 bit 0 (old firmware) or
 flag2 bit 2 (new firmware). It never sets bit 0 and flag2 bit 2 together and never omits bit 1.
-`use_vibration_v2` (K L1798-1810): DualSense `0x0CE6` : `update_version >= DS_FEATURE_VERSION(2,21)`;
+`use_vibration_v2` (K L1806, comment L1795-1804): DualSense `0x0CE6` : `update_version >= DS_FEATURE_VERSION(2,21)`;
 DS_FEATURE_VERSION(major,minor) = `major << 8 | minor` (K L130-133), so **`>= 0x0215`** (not `0x0224`);
 Edge `0x0DF2`: always v2. `update_version` = LE16 at offset 44 of feature report `0x20` (K L1176).
 K's comment: v2 makes rumble behave like classic rumble; the original firmware emulated it through

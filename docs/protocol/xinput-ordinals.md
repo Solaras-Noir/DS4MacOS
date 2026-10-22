@@ -49,12 +49,28 @@ Questions 4).
   GetState=2, SetState=3, GetCapabilities=4, Enable=5, GetDSoundAudioDeviceGuids=6 (1_3 only),
   GetBatteryInformation=7, GetKeystroke=8. The ordinals 93-99 do not match; this supports the
   ordinal-mismatch hypothesis (still unconfirmed; F4SE plugins are another possible factor).
-- On mingw, a `.def` file with explicit `@N` ordinals (e.g. `XInputGetState @2`) pins them.
-  This is a toolchain statement from general knowledge, UNVERIFIED here.
+- A `.def` file passed to the MinGW linker can assign ordinals: GNU ld documents the EXPORTS entry as
+  `name [= ...] [@ordinal] [NONAME] ...` ("may be exported by the specified ordinal"). Example for
+  xinput1_3:
+  ```
+  LIBRARY XINPUT1_3
+  EXPORTS
+    XInputGetState @2
+    XInputSetState @3
+    XInputGetCapabilities @4
+    XInputEnable @5
+    XInputGetDSoundAudioDeviceGuids @6
+    XInputGetBatteryInformation @7
+    XInputGetKeystroke @8
+    XInputGetStateEx @100
+  ```
+  The syntax is sourced; that the built DLL really has these ordinals is UNVERIFIED until task T6
+  checks it with `objdump -p` (export table).
 - Ordinal 1 is DllMain in Wine's spec only because of `-private`; the PE entry point is not an export.
 
 ## Sources
 
 - https://raw.githubusercontent.com/wine-mirror/wine/master/dlls/xinput1_3/xinput1_3.spec (fetched 2026-10-22)
 - https://raw.githubusercontent.com/wine-mirror/wine/master/dlls/xinput1_4/xinput1_4.spec (fetched 2026-10-22)
-- /Users/quixkster/Projects/DS4MacOS/docs/mac-tests/M0-results.md (stub ordinals, crash)
+- https://sourceware.org/binutils/docs/ld/WIN32.html (.def EXPORTS syntax)
+- docs/mac-tests/M0-results.md (stub ordinals, crash)
