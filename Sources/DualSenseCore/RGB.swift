@@ -1,5 +1,5 @@
 /// An 8-bit-per-channel colour, used for the lightbar.
-public struct RGB: Equatable {
+public struct RGB: Equatable, Codable {
     /// Red channel, 0...255.
     public var red: UInt8
     /// Green channel, 0...255.

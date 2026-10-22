@@ -1,5 +1,5 @@
 /// A rectangle in touchpad coordinates (half-open: contains x in origin..<origin+size).
-public struct TouchRect: Equatable {
+public struct TouchRect: Equatable, Codable {
     /// Left edge.
     public var x: Int
     /// Top edge.
@@ -24,7 +24,7 @@ public struct TouchRect: Equatable {
 }
 
 /// How the touchpad is divided into zones.
-public enum TouchZoneLayout: Equatable {
+public enum TouchZoneLayout: Equatable, Codable {
     /// One zone covering the pad.
     case single
     /// Two zones side by side (left = 0, right = 1).
