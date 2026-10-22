@@ -12,7 +12,7 @@ The project is built with Claude Code using a three-seat pipeline (architect, le
 documented in `docs/pipeline.md`. Milestone specs live in `specs/`, session reports in
 `docs/sessions/`, and token measurements in `docs/usage-log.md`.
 
-Status: M0 (scaffold and feasibility) in progress.
+Status: M0 cloud part done; Mac feasibility tests pending (`docs/mac-tests/M0.md`).
 
 ## Build and test
 
