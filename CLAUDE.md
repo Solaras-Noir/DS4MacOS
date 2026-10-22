@@ -20,16 +20,35 @@ Read `docs/pipeline.md` before doing any work. It explains who does what and how
 - Swift 5 language mode (`swiftLanguageModes: [.v5]`) on a 6.0 tools version, XCTest for tests.
   This is a cost decision: strict concurrency errors burn tokens for no product value yet.
 
-## Decisions from the M0 feasibility tests (`docs/mac-tests/M0-results.md`)
+## Product shape: three modes, chosen per profile
 
-- The app owns the controller: it opens the DualSense with seize as soon as it connects, on USB or
-  Bluetooth, and holds it while the app runs. Games never see the physical controller. A game that
-  has seen the controller once stays in controller mode, so seize-before-launch is the user's rule
-  and the app's default, with an explicit pass-through toggle for games with native support.
+The point of the app is to keep what a controller is good at (analogue sticks and triggers, the
+game's own controller support) while adding what the DualSense can do on top (touchpad zones and
+gestures as extra inputs, adaptive triggers, haptics). Replacing the controller with keyboard and
+mouse is one option the user can choose, not the product.
+
+| Mode | Controller access | Game sees | App adds | Use when |
+|---|---|---|---|---|
+| `augment` (default) | opened without seize, shared with the game | the real pad, analogue and all | keyboard/mouse events for touchpad gestures (and any button the user also binds), trigger effects, rumble, lightbar | the game supports controllers and accepts keyboard input alongside |
+| `proxy` (M3b) | seized | a virtual XInput pad served by our DLL inside the CrossOver bottle, built from the app's state | full remapping including touchpad gestures to pad buttons, analogue preserved, the game's rumble calls captured and rendered | XInput games under CrossOver, especially ones that ignore the keyboard in gamepad mode |
+| `keyboardMouse` | seized | nothing | every input as keyboard and mouse events | games with no controller support, or by choice |
+
+Facts behind this (from `docs/mac-tests/M0-results.md`):
+- Reading the pad without seize works while a CrossOver game uses it; CrossOver's own driver then
+  also writes outputs (it set the lightbar when the game took focus), so in `augment` mode the app
+  re-asserts its outputs periodically instead of assuming they stick.
+- Seize works without root and hides the pad from the game, but a game that has seen the pad once
+  stays in controller mode; seize must be active before the game launches.
+- Fallout 4 ignores the keyboard while it is in controller mode, so in Fallout 4 `augment` can only
+  add feedback (triggers, rumble, lightbar), not key bindings. `proxy` is the Fallout 4 answer for
+  analogue plus touchpad bindings; `keyboardMouse` is the fallback and loses analogue.
 - Keyboard and mouse injection through CGEvent works in CrossOver games, including relative mouse
   look. The IOKit input callback buffer includes the report ID in byte 0.
 - The XInput proxy DLL is the only route to analogue sticks and game-driven rumble in CrossOver
-  games; it stays conditional on the rebuilt stub loading cleanly (M1-T6, retested in M2).
+  games; M3b depends on the rebuilt stub loading cleanly (M1-T6, tested in M2).
+
+Never propose a virtual HID device, DriverKit, CoreHID virtual devices, or disabling SIP as a way
+to get analogue into games.
 
 ## Repository layout
 
@@ -55,7 +74,10 @@ scripts/cloud-setup.sh   Setup script for the Claude Code cloud environment.
 
 - Cloud (Linux) sessions: `scripts/swift build` and `scripts/swift test`. Only `DualSenseCore` and its
   tests build on Linux; that is by design.
-- Mac: `swift build`, `swift test`, `swift run ds4probe <command>`.
+- Mac: `scripts/swift build`, `scripts/swift test`, `scripts/swift run ds4probe <command>`. The
+  wrapper selects Xcode's toolchain when Xcode is installed; the Command Line Tools alone cannot run
+  XCTest (`swift test` fails with "XCTest not found"). Plain `swift test` also works if
+  `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer` is set.
 - CI (`.github/workflows/ci.yml`) runs a Linux job for the core and a macOS job for everything.
   A PR is not done until both jobs are green.
 

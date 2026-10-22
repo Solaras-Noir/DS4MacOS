@@ -61,13 +61,19 @@ no escalations. The Opus share was not Opus writing code (it wrote none); it was
 context being re-read on every step: 9.6M cache-read tokens against 1.3k output tokens. Two
 responses: the coder-commits rule above, and the lead model experiment below.
 
-### Lead model experiment (M1)
+### Lead model: Sonnet with Opus as advisor (default from M2)
 
-M1 runs the lead on Sonnet with Opus as advisor: the owner picks Sonnet in the model picker and
-sends `/advisor opus` before the execute line. Sonnet's cache reads cost half of Opus's, and Opus is
-consulted only at decision points. The M1 report must say how many advisor consultations happened.
-Decision rule for M2: if M1 shows escalations or review failures that M0 did not, M2 goes back to an
-Opus lead and the cost difference is recorded; otherwise Sonnet plus advisor becomes the default.
+M1 ran the lead on Sonnet with Opus as advisor (`/advisor opus` sent before the execute line).
+Result: 7 tasks, 90 tests, no escalations, two advisor consultations, one genuine review failure
+(a doc with uncited numbers) and one caused by the lead briefing a coder from a stale spec. That
+is as clean as M0's Opus lead, so Sonnet plus advisor is the default lead. Opus returns as lead
+only if a milestone's report shows escalations.
+
+M1 was run as a local Mac session by choice, so its cost went to the Max plan rather than the
+credit, and the lead could verify rumble on the controller mid-session. Two things differ in a
+local session: subagents cannot commit (the permission prompt has no one to answer it), so the
+lead commits after running the tests itself; and `swift test` needs Xcode's toolchain
+(`scripts/swift` now selects it).
 
 ## Schedule and caps
 
@@ -77,10 +83,10 @@ classes, because each milestone ends with the owner holding the controller.
 | | Milestone | Cloud deliverable | Mac deliverable | Finish by | Cap |
 |---|---|---|---|---|---|
 | M0 | Scaffold and feasibility (done, $7.47) | Package, CI, minimal core, `ds4probe`, XInput stub DLL | Fixtures captured; seize, injection, bridge and XInput tests run in Fallout 4 | done Oct 22 | $20 |
-| M1 | Controller core | Full USB and Bluetooth parsing with CRC, output reports with triggers, rumble fix, touchpad gesture engine, protocol doc, stub ordinals | Checked inside the M2 Mac session | Sat Oct 24 | $25 |
-| M2 | Mac layer | Device manager with hot-plug, both transports and seize-by-default, keyboard/mouse output with analogue curves, permissions flow, headless runner | Play Fallout 4 on a hard-coded profile; rumble and stub retest | Tue Oct 27 | $30 |
-| M3 | Profile engine | Profile file format, mappings, trigger and haptic presets, input-reactive haptics, per-app auto-switch | Fallout 4 profile v1 | Thu Oct 29 | $35 |
-| M3b | XInput bridge (if the rebuilt stub loads in M2's Mac test) | Proxy DLL with UDP state and rumble capture, Mac side | Analogue sticks and game rumble in Fallout 4 | Sat Oct 31 | $35 |
+| M1 | Controller core (done, local session) | Full USB and Bluetooth parsing with CRC, output reports with triggers, rumble fix, touchpad gesture engine, protocol doc, stub ordinals | Rumble verified in-session on firmware 0x0633 | done Oct 22 | $25 |
+| M2 | Mac layer and modes | Device manager with hot-plug, both transports, seize per mode, mapping engine with analogue curves, `augment` and `keyboardMouse` modes, headless runner | Play Fallout 4 in both modes; touchpad keys in a mixed-input game; stub load test | Tue Oct 27 | $30 |
+| M3 | Profile engine | Profile files, presets for triggers and haptics, input-reactive haptics rules, per-app auto-switch, Fallout 4 profile v1 | Fallout 4 profile v1 in play | Thu Oct 29 | $35 |
+| M3b | XInput proxy mode (if the stub loads in M2's Mac test) | Proxy DLL serving a virtual pad from the app over UDP, rumble capture, `proxy` mode in the engine | Analogue sticks, touchpad bindings and game rumble in Fallout 4 | Sat Oct 31 | $35 |
 | M4 | Menu bar app | SwiftUI profile editor, live input view, launch at login | Daily-use check | Sun Nov 1 | $40 |
 | M5 | Tune and ship | Fixes from play, install docs, release build | Fallout 4 profile tuned in play | Tue Nov 3 | $20 |
 | | Reserve for overruns | | | | $45 |

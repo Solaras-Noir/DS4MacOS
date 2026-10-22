@@ -10,6 +10,7 @@ Credit at start of project: $250.00 (expires Wed Nov 4, 2026, 11:59 PM PT).
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | 2026-10-22 | M0 cloud | [session](https://claude.ai/code/session_01VtXTQSAszsuDFp3CjCNsi9) | Opus 5.5, low | $250 | $242 | $7.47 | 80% | 20% | 0% | 251,609 | 0 | API time 18m37s, active 9m45s, cache hit 96%. Opus: 9.6M cache-read, 386.7k cache-write, 1.3k output tokens. Reviewer 9%, coder 6% of session. |
 | 2026-10-22 | M0 mac | local, Max plan | Sonnet 5.5 | n/a | n/a | $5.45 equiv. | 0% | 100% | 0% | 0 (no subagents) | 0 | API time 16m13s, active 7m41s, cache hit 99%. 21.5M cache-read, 32.1k output. 41% of the session ran above 150k context: an interactive protocol session gets long; compact between sections next time. |
+| 2026-10-22 | M1 (run locally) | local, Max plan | Sonnet 5.5 lead + Opus advisor | n/a | n/a | (owner to fill from `/usage`) | | | | about 752,500 (researcher 312.7k incl. a fix pass, coders 234k, reviewers 269k; one figure may be cumulative) | 0 | 7 tasks, 90 tests, 2 advisor consultations, 2 review failures (1 genuine). Rumble verified on hardware in-session. |
 
 Shares are percentages of the session's total tokens as `/usage` reports them. Escalations is the
 number of tasks the lead had to finish itself.
@@ -19,7 +20,7 @@ number of tasks the lead had to finish itself.
 | | Planned cap | Spent | Remaining credit |
 |---|---|---|---|
 | M0 | $20 | $7.47 | $242 |
-| M1 | $25 | | |
+| M1 | $25 | $0 (ran on the Max plan) | $242 |
 | M2 | $30 | | |
 | M3 | $35 | | |
 | M3b | $35 | | |

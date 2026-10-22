@@ -12,7 +12,7 @@ The project is built with Claude Code using a three-seat pipeline (architect, le
 documented in `docs/pipeline.md`. Milestone specs live in `specs/`, session reports in
 `docs/sessions/`, and token measurements in `docs/usage-log.md`.
 
-Status: M0 done (feasibility confirmed, see `docs/mac-tests/M0-results.md`); M1 controller core in progress.
+Status: M0 and M1 done (feasibility confirmed, controller core merged); M2 Mac layer and modes in progress.
 
 ## Build and test
 
