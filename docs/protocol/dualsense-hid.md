@@ -190,9 +190,12 @@ haptics hardware. P comment: "0x01 set the main motors (also requires flag 0x02)
 Why M0 rumble failed: M0 sent flag0 `0x01` and flag2 `0x04` with **no bit 1 (HAPTICS_SELECT)**. That
 matches neither kernel path, so motors were not selected. (M0's "flags match the Linux driver" claim
 is wrong.) Motor offsets were right: USB buffer 3 = motor_right (weak), 4 = motor_left (strong), both
-consistent with K. Fix, source-backed but **not yet confirmed on hardware**: `flag0 |= 0x03` and
-`flag2 |= 0x04` (spec M1-T3 choice; sending both bit 0 and flag2 b2 is not what K does, so on very old
-firmware it is untested, UNVERIFIED), or read `update_version` and send exactly the kernel's variant.
+consistent with K. Fix (owner decision, kernel-faithful): `VibrationMode.v1` sets `flag0 |= 0x03`; `.v2` sets `flag0 |= 0x02`
+and `flag2 |= 0x04`; never flag0 b0 and flag2 b2 together. Default `.v2`; M2's DeviceManager reads
+`update_version` and chooses (v2 iff >= `0x0215`). **Confirmed on hardware (M1, 2026-10-22, USB):** firmware
+`update_version` = `0x0633` (feature `0x20` buffer starts `20 53 65 70`, ID included, so offset 44 is right);
+`rumble 200 200 --ms 1000` felt with both `--vibration v2` and `--vibration v1`. Old-firmware (< 2.21)
+behaviour is untested (no such controller).
 Stop rumble by sending the same flags with motors 0. Mac retest should also print `update_version`.
 
 ## Lightbar, player LEDs, mic LED
