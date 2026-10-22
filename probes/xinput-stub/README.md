@@ -94,3 +94,11 @@ The stub logs nothing at load; the first line appears on the first XInput call.
 ## Remove
 
 Delete both DLLs from the game folder and remove the `Fallout4.exe` DLL overrides (or the registry key above).
+
+## Pinned image base (probe only)
+
+The DLLs have no `.reloc` section, so the Makefile pins the image base to `0x180000000` and clears the
+DYNAMIC_BASE and HIGH_ENTROPY_VA flags (`--image-base`, `--disable-dynamicbase`,
+`--disable-high-entropy-va`). That is acceptable for a feasibility probe loaded by one game under
+CrossOver. A shipping proxy DLL (M3b) should be built with relocations instead. Not yet tested in a
+bottle; the M2 Mac session does that.
