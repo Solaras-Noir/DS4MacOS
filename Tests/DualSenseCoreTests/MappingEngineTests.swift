@@ -77,19 +77,21 @@ final class MappingEngineTests: XCTestCase {
         let s = MapTest.state(right: (1, 0))
         var total = 0.0
         var t = 1.0
-        for _ in 0..<101 { // 100 steps of 10 ms = 1 s, 1 px per step... use finer: 2 ms
+        for _ in 0..<101 { // 101 updates, 2 ms apart (first has dt 0), so 200 ms of movement
             for a in update(e, s, at: t).actions { if case let .mouseMove(dx, _) = a { total += dx } }
             t += 0.002
         }
-        // 200 ms at 100 px/s = 20 px even though each step is 0.2 px.
+        // 200 ms at 100 px/s = 20 px even though each step is only 0.2 px.
         XCTAssertEqual(total, 20, accuracy: 1)
     }
 
     func testRadialDeadZone() {
         let e = engine(.fallout4KeyboardMouse) // dead zone 0.12
-        // Diagonal (0.1, 0.1) has magnitude 0.141 > 0.12 on a per-axis check would pass; both
-        // axes below 0.12 but radial magnitude above, so a radial dead zone moves; (0.08,0.08) does not.
+        // Radial check: (0.1, 0.1) has each axis under 0.12 but magnitude 0.141, so it moves;
+        // (0.08, 0.08) has magnitude 0.113, inside the dead zone.
         XCTAssertEqual(MapTest.totalMove(e, state: MapTest.state(right: (0.08, 0.08)), rate: 0.004).0, 0)
+        XCTAssertNotEqual(MapTest.totalMove(engine(.fallout4KeyboardMouse),
+                                            state: MapTest.state(right: (0.1, 0.1)), rate: 0.004).0, 0)
         XCTAssertEqual(MapTest.totalMove(engine(.fallout4KeyboardMouse),
                                          state: MapTest.state(right: (0.11, 0)), rate: 0.004).0, 0)
         XCTAssertGreaterThan(MapTest.totalMove(engine(.fallout4KeyboardMouse),
